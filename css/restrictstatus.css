@@ -1,0 +1,174 @@
+/**
+ * ---------------------------------------------------------------------
+ * Restrict Status - Plugin GLPI 10 & 11
+ * Estilos CSS para banner de restrição e bloqueio visual absoluto
+ * Suporte a Tema Claro e Escuro nativo do GLPI
+ * ---------------------------------------------------------------------
+ */
+
+.restrictstatus-banner {
+    border-left: 5px solid #f59f00 !important;
+    background-color: rgba(245, 159, 0, 0.08) !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+[data-bs-theme="dark"] .restrictstatus-banner {
+    background-color: rgba(245, 159, 0, 0.15) !important;
+    border-color: #f59f00 !important;
+    color: #e6edf3 !important;
+}
+
+[data-bs-theme="dark"] .restrictstatus-banner .text-dark {
+    color: #f0f6fc !important;
+}
+
+.restrictstatus-banner:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.restrictstatus-disabled-btn {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* =====================================================================
+   BLOQUEIO VISUAL ABSOLUTO DE SOLUÇÕES (ITILSolution)
+   ===================================================================== */
+body.restrict-solutions #new-ITILSolution-block,
+body[data-restrict-solutions="1"] #new-ITILSolution-block,
+body.restrict-solutions .timeline-item.ITILSolution,
+body[data-restrict-solutions="1"] .timeline-item.ITILSolution,
+body.restrict-solutions .itilsolution,
+body[data-restrict-solutions="1"] .itilsolution,
+body.restrict-solutions .action-solution,
+body[data-restrict-solutions="1"] .action-solution,
+body.restrict-solutions [data-bs-target="#new-ITILSolution-block"],
+body[data-restrict-solutions="1"] [data-bs-target="#new-ITILSolution-block"],
+body.restrict-solutions [data-bs-target*="ITILSolution"],
+body[data-restrict-solutions="1"] [data-bs-target*="ITILSolution"],
+body.restrict-solutions [data-bs-target*="Solution"],
+body[data-restrict-solutions="1"] [data-bs-target*="Solution"],
+body.restrict-solutions button.ITILSolution,
+body[data-restrict-solutions="1"] button.ITILSolution,
+body.restrict-solutions a.ITILSolution,
+body[data-restrict-solutions="1"] a.ITILSolution,
+body.restrict-solutions li:has([data-bs-target*="ITILSolution"]),
+body[data-restrict-solutions="1"] li:has([data-bs-target*="ITILSolution"]),
+body.restrict-solutions li:has(.action-solution),
+body[data-restrict-solutions="1"] li:has(.action-solution),
+body.restrict-solutions li[aria-label*="Solução"],
+body[data-restrict-solutions="1"] li[aria-label*="Solução"],
+body.restrict-solutions li[aria-label*="Solution"],
+body[data-restrict-solutions="1"] li[aria-label*="Solution"],
+body.restrict-solutions form[action*="itilsolution"],
+body[data-restrict-solutions="1"] form[action*="itilsolution"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* =====================================================================
+   BLOQUEIO VISUAL ABSOLUTO DE ACOMPANHAMENTOS (ITILFollowup)
+   ===================================================================== */
+body.restrict-followups #new-ITILFollowup-block,
+body[data-restrict-followups="1"] #new-ITILFollowup-block,
+body.restrict-followups .timeline-item.ITILFollowup,
+body[data-restrict-followups="1"] .timeline-item.ITILFollowup,
+body.restrict-followups .action-followup,
+body[data-restrict-followups="1"] .action-followup,
+body.restrict-followups .action-answer,
+body[data-restrict-followups="1"] .action-answer,
+body.restrict-followups [data-bs-target="#new-ITILFollowup-block"],
+body[data-restrict-followups="1"] [data-bs-target="#new-ITILFollowup-block"],
+body.restrict-followups [data-bs-target*="ITILFollowup"],
+body[data-restrict-followups="1"] [data-bs-target*="ITILFollowup"],
+body.restrict-followups button.ITILFollowup,
+body[data-restrict-followups="1"] button.ITILFollowup,
+body.restrict-followups a.ITILFollowup,
+body[data-restrict-followups="1"] a.ITILFollowup,
+body.restrict-followups .itil-btn-answer,
+body[data-restrict-followups="1"] .itil-btn-answer,
+body.restrict-followups li:has([data-bs-target*="ITILFollowup"]),
+body[data-restrict-followups="1"] li:has([data-bs-target*="ITILFollowup"]),
+body.restrict-followups li:has(.action-followup),
+body[data-restrict-followups="1"] li:has(.action-followup),
+body.restrict-followups form[action*="itilfollowup"],
+body[data-restrict-followups="1"] form[action*="itilfollowup"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* =====================================================================
+   BLOQUEIO VISUAL ABSOLUTO DE DOCUMENTOS (Document / Document_Item)
+   ===================================================================== */
+body.restrict-documents #new-Document_Item-block,
+body[data-restrict-documents="1"] #new-Document_Item-block,
+body.restrict-documents #new-Document-block,
+body[data-restrict-documents="1"] #new-Document-block,
+body.restrict-documents .timeline-item.Document_Item,
+body[data-restrict-documents="1"] .timeline-item.Document_Item,
+body.restrict-documents .timeline-item.Document,
+body[data-restrict-documents="1"] .timeline-item.Document,
+body.restrict-documents .action-document,
+body[data-restrict-documents="1"] .action-document,
+body.restrict-documents [data-bs-target*="Document"],
+body[data-restrict-documents="1"] [data-bs-target*="Document"],
+body.restrict-documents li:has([data-bs-target*="Document"]),
+body[data-restrict-documents="1"] li:has([data-bs-target*="Document"]),
+body.restrict-documents li:has(.action-document),
+body[data-restrict-documents="1"] li:has(.action-document) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* =====================================================================
+   BLOQUEIO VISUAL ABSOLUTO DE TAREFAS (TicketTask / ITILTask)
+   ===================================================================== */
+body.restrict-tasks #new-TicketTask-block,
+body[data-restrict-tasks="1"] #new-TicketTask-block,
+body.restrict-tasks #new-ITILTask-block,
+body[data-restrict-tasks="1"] #new-ITILTask-block,
+body.restrict-tasks .timeline-item.TicketTask,
+body[data-restrict-tasks="1"] .timeline-item.TicketTask,
+body.restrict-tasks .timeline-item.ITILTask,
+body[data-restrict-tasks="1"] .timeline-item.ITILTask,
+body.restrict-tasks .action-task,
+body[data-restrict-tasks="1"] .action-task,
+body.restrict-tasks [data-bs-target*="Task"],
+body[data-restrict-tasks="1"] [data-bs-target*="Task"],
+body.restrict-tasks li:has([data-bs-target*="Task"]),
+body[data-restrict-tasks="1"] li:has([data-bs-target*="Task"]),
+body.restrict-tasks li:has(.action-task),
+body[data-restrict-tasks="1"] li:has(.action-task) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
