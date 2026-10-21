@@ -181,7 +181,7 @@ const RestrictStatus = {
                 });
             });
 
-            // Oculta botões, links e itens de menu de Solução
+            // Oculta botões, links e itens de menu de Solução por atributos, seletores e texto
             document.querySelectorAll(
                 'button[data-bs-target="#new-ITILSolution-block"], ' +
                 'a[data-bs-target="#new-ITILSolution-block"], ' +
@@ -192,6 +192,7 @@ const RestrictStatus = {
                 '.timeline-buttons button.ITILSolution, ' +
                 '.timeline-buttons a.ITILSolution, ' +
                 '.timeline-buttons .action-solution, ' +
+                '#itil-footer .action-solution, ' +
                 'button.action-solution, ' +
                 'a.action-solution, ' +
                 '[data-itemtype="ITILSolution"], ' +
@@ -210,14 +211,15 @@ const RestrictStatus = {
             const mainActionBtn = document.querySelector('#itil-footer .main-actions > button.answer-action');
             if (mainActionBtn) {
                 const target = mainActionBtn.getAttribute('data-bs-target') || '';
-                if (target.includes('ITILSolution') || target.includes('Solution') || mainActionBtn.classList.contains('action-solution')) {
+                const text = (mainActionBtn.textContent || '').toLowerCase();
+                if (target.includes('ITILSolution') || target.includes('Solution') || mainActionBtn.classList.contains('action-solution') || text.includes('solução') || text.includes('solution')) {
                     mainActionBtn.style.setProperty('display', 'none', 'important');
                     mainActionBtn.disabled = true;
                 }
             }
         }
 
-        // 2. Bloqueio de Acompanhamentos (ITILFollowup)
+        // 2. Bloqueio de Acompanhamentos (ITILFollowup / Responder)
         if (restrictFollowups) {
             document.body.setAttribute('data-restrict-followups', '1');
             document.body.classList.add('restrict-followups');
@@ -239,6 +241,8 @@ const RestrictStatus = {
                 '.timeline-buttons button.ITILFollowup, ' +
                 '.timeline-buttons a.ITILFollowup, ' +
                 '.timeline-buttons .action-followup, ' +
+                '#itil-footer .action-answer, ' +
+                '#itil-footer .action-followup, ' +
                 'button.action-followup, ' +
                 'a.action-followup, ' +
                 '.itil-btn-answer, ' +
@@ -256,14 +260,15 @@ const RestrictStatus = {
             const mainActionBtn = document.querySelector('#itil-footer .main-actions > button.answer-action');
             if (mainActionBtn) {
                 const target = mainActionBtn.getAttribute('data-bs-target') || '';
-                if (target.includes('ITILFollowup') || target.includes('Followup') || mainActionBtn.classList.contains('action-followup') || mainActionBtn.classList.contains('action-answer')) {
+                const text = (mainActionBtn.textContent || '').toLowerCase().trim();
+                if (target.includes('ITILFollowup') || target.includes('Followup') || mainActionBtn.classList.contains('action-followup') || mainActionBtn.classList.contains('action-answer') || text === 'responder' || text === 'answer') {
                     mainActionBtn.style.setProperty('display', 'none', 'important');
                     mainActionBtn.disabled = true;
                 }
             }
         }
 
-        // 3. Bloqueio de Documentos (Document / Document_Item)
+        // 3. Bloqueio de Documentos (Document / Document_Item / Adicionar documento)
         if (restrictDocuments) {
             document.body.setAttribute('data-restrict-documents', '1');
             document.body.classList.add('restrict-documents');
@@ -280,11 +285,14 @@ const RestrictStatus = {
             document.querySelectorAll(
                 'button[data-bs-target="#new-Document-block"], ' +
                 'a[data-bs-target="#new-Document-block"], ' +
+                'button[data-bs-target="#new-Document_Item-block"], ' +
+                'a[data-bs-target="#new-Document_Item-block"], ' +
                 'button[data-bs-target*="Document"], ' +
                 'a[data-bs-target*="Document"], ' +
                 '.timeline-buttons button.Document, ' +
                 '.timeline-buttons [data-bs-target*="Document"], ' +
                 '.timeline-buttons .action-document, ' +
+                '#itil-footer .action-document, ' +
                 'button.action-document, ' +
                 'a.action-document, ' +
                 'button[name="add_document"], input[name="add_document"]'
@@ -323,6 +331,7 @@ const RestrictStatus = {
                 '.timeline-buttons button.TicketTask, ' +
                 '.timeline-buttons [data-bs-target*="TicketTask"], ' +
                 '.timeline-buttons .action-task, ' +
+                '#itil-footer .action-task, ' +
                 'button.action-task, ' +
                 'a.action-task, ' +
                 'button[name="add_task"], input[name="add_task"]'
@@ -337,16 +346,35 @@ const RestrictStatus = {
             });
         }
 
-        // Se todas as ações em .main-actions foram ocultadas, esconde o container .main-actions
-        const mainActions = document.querySelector('#itil-footer .main-actions');
-        if (mainActions) {
-            const hasVisibleAction = Array.from(mainActions.querySelectorAll('button:not(.dropdown-toggle), a.dropdown-item')).some(el => {
-                return el.style.display !== 'none' && !el.disabled;
+        // Se acompanhamentos, soluções e documentos estão todos restritos, oculta totalmente o bloco .main-actions
+        if (restrictFollowups && restrictSolutions && restrictDocuments) {
+            document.querySelectorAll('#itil-footer .main-actions, .main-actions').forEach(el => {
+                el.style.setProperty('display', 'none', 'important');
+            });
+        }
+
+        // Validação adicional: oculta dropdown-toggle se todos os itens da lista suspensa estiverem ocultos
+        document.querySelectorAll('#itil-footer .main-actions').forEach(mainActions => {
+            const dropdownItems = Array.from(mainActions.querySelectorAll('ul.dropdown-menu li, ul.dropdown-menu a'));
+            if (dropdownItems.length > 0) {
+                const hasVisibleDropdown = dropdownItems.some(el => {
+                    return el.style.display !== 'none' && window.getComputedStyle(el).display !== 'none';
+                });
+                if (!hasVisibleDropdown) {
+                    mainActions.querySelectorAll('.dropdown-toggle, .dropdown-toggle-split, ul.dropdown-menu').forEach(toggle => {
+                        toggle.style.setProperty('display', 'none', 'important');
+                    });
+                }
+            }
+
+            const actionButtons = Array.from(mainActions.querySelectorAll('button:not(.dropdown-toggle), a.dropdown-item'));
+            const hasVisibleAction = actionButtons.some(el => {
+                return el.style.display !== 'none' && window.getComputedStyle(el).display !== 'none' && !el.disabled;
             });
             if (!hasVisibleAction) {
                 mainActions.style.setProperty('display', 'none', 'important');
             }
-        }
+        });
     },
 
     /**

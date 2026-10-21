@@ -187,6 +187,12 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
         } elseif (!$isAssign && (int)$configRow['restrict_requester'] === 1 && Session::getCurrentInterface() === 'helpdesk') {
             // Usuário comum da interface simplificada (helpdesk) sem atribuição técnica
             $restrictedRole = __('Usuário Solicitante', 'restrictstatus');
+        } elseif (!$isAssign && (int)$configRow['restrict_assigned'] === 1 && Session::getCurrentInterface() !== 'helpdesk') {
+            // Usuário ou técnico na interface padrão/central com perfil restrito
+            $restrictedRole = __('Técnico', 'restrictstatus');
+        } elseif ((int)$configRow['restrict_assigned'] === 1) {
+            // Regra ampla para perfil técnico quando a restrição de técnicos estiver ativa
+            $restrictedRole = __('Técnico / Perfil', 'restrictstatus');
         }
 
         if ($restrictedRole === null) {

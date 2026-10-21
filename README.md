@@ -66,22 +66,30 @@ O **Restrict Status** resolve essa demanda aplicando bloqueios dinâmicos tanto 
 
 ---
 
-## 🧱 Arquitetura de Segurança em Dupla Camada
+## 🧱 Arquitetura de Segurança em Múltiplas Camadas
 
-O plugin opera com um modelo de **Defesa em Profundidade (Defense-in-Depth)**:
+O plugin opera com um modelo avançado de **Defesa em Profundidade (Defense-in-Depth)**:
 
 ```
-[ Usuário no Navegador ]
+[ Requisição do Chamado no GLPI ]
          │
          ▼
-[ 1. Camada Visual / Frontend ]
-  ├─ Regras CSS imediatas (display: none !important)
+[ 1. Camada de Renderização do Servidor (GLPI Core) ]
+  ├─ Hook timeline_answer_actions (CommonITILObject)
+  │    └─ Define 'hide_in_menu' => true nos botões restritos
+  │    └─ O Twig (footer.html.twig) NEM RENDERIZA os botões no HTML
+  ├─ Hook item_can (CommonDBTM::can)
+  │    └─ Nega direitos CREATE e UPDATE no nível nativo de entidades
+         │
+         ▼
+[ 2. Camada Visual / Frontend ]
+  ├─ Regras CSS prioritárias (display: none !important nos botões e dropdowns)
   ├─ JavaScript com MutationObserver (monitora rodapé e timeline em AJAX)
   ├─ Interceptação de eventos Bootstrap (show.bs.collapse)
   └─ Interceptação de submissão de formulários (submit prevent)
          │
-         ▼ (Caso tente burlar via DevTools, cURL ou script)
-[ 2. Camada Backend / GLPI Core ]
+         ▼ (Caso tente burlar via DevTools, AJAX manual ou API)
+[ 3. Camada de Persistência no Backend (Segurança Definitiva) ]
   ├─ Hook pre_item_add (ITILFollowup, ITILSolution, Document, TicketTask)
   │    └─ Invalida a inserção ($item->input = false)
   ├─ Hook pre_item_update (Ticket)

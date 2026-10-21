@@ -44,12 +44,16 @@ body.restrict-solutions .itilsolution,
 body[data-restrict-solutions="1"] .itilsolution,
 body.restrict-solutions .action-solution,
 body[data-restrict-solutions="1"] .action-solution,
+body.restrict-solutions #itil-footer .action-solution,
+body[data-restrict-solutions="1"] #itil-footer .action-solution,
 body.restrict-solutions [data-bs-target="#new-ITILSolution-block"],
 body[data-restrict-solutions="1"] [data-bs-target="#new-ITILSolution-block"],
 body.restrict-solutions [data-bs-target*="ITILSolution"],
 body[data-restrict-solutions="1"] [data-bs-target*="ITILSolution"],
 body.restrict-solutions [data-bs-target*="Solution"],
 body[data-restrict-solutions="1"] [data-bs-target*="Solution"],
+body.restrict-solutions #itil-footer [data-bs-target="#new-ITILSolution-block"],
+body[data-restrict-solutions="1"] #itil-footer [data-bs-target="#new-ITILSolution-block"],
 body.restrict-solutions button.ITILSolution,
 body[data-restrict-solutions="1"] button.ITILSolution,
 body.restrict-solutions a.ITILSolution,
@@ -58,6 +62,8 @@ body.restrict-solutions li:has([data-bs-target*="ITILSolution"]),
 body[data-restrict-solutions="1"] li:has([data-bs-target*="ITILSolution"]),
 body.restrict-solutions li:has(.action-solution),
 body[data-restrict-solutions="1"] li:has(.action-solution),
+body.restrict-solutions #itil-footer li:has(.action-solution),
+body[data-restrict-solutions="1"] #itil-footer li:has(.action-solution),
 body.restrict-solutions li[aria-label*="Solução"],
 body[data-restrict-solutions="1"] li[aria-label*="Solução"],
 body.restrict-solutions li[aria-label*="Solution"],
@@ -76,7 +82,7 @@ body[data-restrict-solutions="1"] form[action*="itilsolution"] {
 }
 
 /* =====================================================================
-   BLOQUEIO VISUAL ABSOLUTO DE ACOMPANHAMENTOS (ITILFollowup)
+   BLOQUEIO VISUAL ABSOLUTO DE ACOMPANHAMENTOS (ITILFollowup / Responder)
    ===================================================================== */
 body.restrict-followups #new-ITILFollowup-block,
 body[data-restrict-followups="1"] #new-ITILFollowup-block,
@@ -86,6 +92,12 @@ body.restrict-followups .action-followup,
 body[data-restrict-followups="1"] .action-followup,
 body.restrict-followups .action-answer,
 body[data-restrict-followups="1"] .action-answer,
+body.restrict-followups #itil-footer .action-answer,
+body[data-restrict-followups="1"] #itil-footer .action-answer,
+body.restrict-followups #itil-footer .action-followup,
+body[data-restrict-followups="1"] #itil-footer .action-followup,
+body.restrict-followups #itil-footer [data-bs-target="#new-ITILFollowup-block"],
+body[data-restrict-followups="1"] #itil-footer [data-bs-target="#new-ITILFollowup-block"],
 body.restrict-followups [data-bs-target="#new-ITILFollowup-block"],
 body[data-restrict-followups="1"] [data-bs-target="#new-ITILFollowup-block"],
 body.restrict-followups [data-bs-target*="ITILFollowup"],
@@ -100,6 +112,10 @@ body.restrict-followups li:has([data-bs-target*="ITILFollowup"]),
 body[data-restrict-followups="1"] li:has([data-bs-target*="ITILFollowup"]),
 body.restrict-followups li:has(.action-followup),
 body[data-restrict-followups="1"] li:has(.action-followup),
+body.restrict-followups #itil-footer li:has(.action-followup),
+body[data-restrict-followups="1"] #itil-footer li:has(.action-followup),
+body.restrict-followups #itil-footer li:has(.action-answer),
+body[data-restrict-followups="1"] #itil-footer li:has(.action-answer),
 body.restrict-followups form[action*="itilfollowup"],
 body[data-restrict-followups="1"] form[action*="itilfollowup"] {
     display: none !important;
@@ -126,12 +142,18 @@ body.restrict-documents .timeline-item.Document,
 body[data-restrict-documents="1"] .timeline-item.Document,
 body.restrict-documents .action-document,
 body[data-restrict-documents="1"] .action-document,
+body.restrict-documents #itil-footer .action-document,
+body[data-restrict-documents="1"] #itil-footer .action-document,
 body.restrict-documents [data-bs-target*="Document"],
 body[data-restrict-documents="1"] [data-bs-target*="Document"],
+body.restrict-documents #itil-footer [data-bs-target*="Document"],
+body[data-restrict-documents="1"] #itil-footer [data-bs-target*="Document"],
 body.restrict-documents li:has([data-bs-target*="Document"]),
 body[data-restrict-documents="1"] li:has([data-bs-target*="Document"]),
 body.restrict-documents li:has(.action-document),
-body[data-restrict-documents="1"] li:has(.action-document) {
+body[data-restrict-documents="1"] li:has(.action-document),
+body.restrict-documents #itil-footer li:has(.action-document),
+body[data-restrict-documents="1"] #itil-footer li:has(.action-document) {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -156,8 +178,12 @@ body.restrict-tasks .timeline-item.ITILTask,
 body[data-restrict-tasks="1"] .timeline-item.ITILTask,
 body.restrict-tasks .action-task,
 body[data-restrict-tasks="1"] .action-task,
+body.restrict-tasks #itil-footer .action-task,
+body[data-restrict-tasks="1"] #itil-footer .action-task,
 body.restrict-tasks [data-bs-target*="Task"],
 body[data-restrict-tasks="1"] [data-bs-target*="Task"],
+body.restrict-tasks #itil-footer [data-bs-target*="Task"],
+body[data-restrict-tasks="1"] #itil-footer [data-bs-target*="Task"],
 body.restrict-tasks li:has([data-bs-target*="Task"]),
 body[data-restrict-tasks="1"] li:has([data-bs-target*="Task"]),
 body.restrict-tasks li:has(.action-task),
@@ -171,4 +197,17 @@ body[data-restrict-tasks="1"] li:has(.action-task) {
     padding: 0 !important;
     margin: 0 !important;
     overflow: hidden !important;
+}
+
+/* =====================================================================
+   BLOQUEIO COMBINADO: OCULTAÇÃO TOTAL DO GRUPO DE AÇÕES QUANDO TUDO RESTRITO
+   ===================================================================== */
+body.restrict-followups.restrict-solutions.restrict-documents #itil-footer .main-actions,
+body.restrict-followups.restrict-solutions.restrict-documents .main-actions,
+body[data-restrict-followups="1"][data-restrict-solutions="1"][data-restrict-documents="1"] #itil-footer .main-actions,
+body[data-restrict-followups="1"][data-restrict-solutions="1"][data-restrict-documents="1"] .main-actions {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
 }

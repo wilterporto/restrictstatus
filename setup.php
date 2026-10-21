@@ -18,7 +18,7 @@ if (!defined('GLPI_ROOT')) {
 
 require_once __DIR__ . '/inc/enums.class.php';
 
-define('PLUGIN_RESTRICTSTATUS_VERSION', '1.0.0');
+define('PLUGIN_RESTRICTSTATUS_VERSION', '1.0.1');
 define('PLUGIN_RESTRICTSTATUS_MIN_GLPI', '10.0.0');
 define('PLUGIN_RESTRICTSTATUS_MAX_GLPI', '11.9.99');
 define('PLUGIN_RESTRICTSTATUS_MIN_PHP', '8.3.0');
@@ -70,6 +70,12 @@ function plugin_init_restrictstatus(): void {
 
         // Hook na timeline de chamados para injetar aviso e controle de exibição
         $PLUGIN_HOOKS['timeline_actions']['restrictstatus'] = 'plugin_restrictstatus_timeline_actions';
+
+        // Hook essencial do GLPI para ocultar nativamente botões da timeline no rodapé (Responder, Solução, Documento, Tarefa)
+        $PLUGIN_HOOKS['timeline_answer_actions']['restrictstatus'] = 'plugin_restrictstatus_timeline_answer_actions';
+
+        // Hook de direitos nativo do GLPI (CommonDBTM::can): bloqueia direitos CREATE e UPDATE
+        $PLUGIN_HOOKS['item_can']['restrictstatus'] = 'plugin_restrictstatus_item_can';
 
         // Carrega CSS e JavaScript do plugin para manipulação visual em tempo real
         $PLUGIN_HOOKS['add_javascript']['restrictstatus'] = [

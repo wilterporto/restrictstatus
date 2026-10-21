@@ -354,3 +354,132 @@ function plugin_restrictstatus_timeline_actions(array $params): void {
     }
 }
 
+/**
+ * Hook timeline_answer_actions
+ * Remove nativamente botões da timeline no rodapé do chamado (Responder, Adicionar Solução, Adicionar Documento, Tarefa)
+ *
+ * @param array $params
+ * @return array
+ */
+function plugin_restrictstatus_timeline_answer_actions(array $params): array {
+    $ticket = $params['item'] ?? null;
+    if (!$ticket || !($ticket instanceof Ticket)) {
+        return [];
+    }
+
+    $userId = Session::getLoginUserID();
+    $restriction = PluginRestrictstatusRestriction::evaluateTicketRestriction($ticket, $userId, 'all');
+
+    if (!$restriction['restricted']) {
+        return [];
+    }
+
+    $rItems = $restriction['restricted_items'] ?? [];
+    $overrides = [];
+
+    // Oculta nativamente o botão de Acompanhamento (Responder)
+    if (!empty($rItems['followup'])) {
+        $overrides['answer'] = [
+            'type'         => 'ITILFollowup',
+            'class'        => 'ITILFollowup',
+            'icon'         => ITILFollowup::getIcon(),
+            'label'        => _x('button', 'Answer'),
+            'short_label'  => _x('button', 'Answer'),
+            'template'     => 'components/itilobject/timeline/form_followup.html.twig',
+            'item'         => new ITILFollowup(),
+            'hide_in_menu' => true,
+        ];
+    }
+
+    // Oculta nativamente o botão de Solução (Adicionar uma solução)
+    if (!empty($rItems['solution'])) {
+        $overrides['solution'] = [
+            'type'         => 'ITILSolution',
+            'class'        => 'ITILSolution',
+            'icon'         => ITILSolution::getIcon(),
+            'label'        => _x('button', 'Add a solution'),
+            'short_label'  => _x('button', 'Solution'),
+            'template'     => 'components/itilobject/timeline/form_solution.html.twig',
+            'item'         => new ITILSolution(),
+            'hide_in_menu' => true,
+        ];
+    }
+
+    // Oculta nativamente o botão de Documento (Adicionar documento)
+    if (!empty($rItems['document'])) {
+        $overrides['document'] = [
+            'type'         => 'Document_Item',
+            'class'        => Document_Item::class,
+            'icon'         => Document_Item::getIcon(),
+            'label'        => _x('button', 'Add a document'),
+            'short_label'  => _x('button', 'Document'),
+            'template'     => 'components/itilobject/timeline/form_document_item.html.twig',
+            'item'         => new Document_Item(),
+            'hide_in_menu' => true,
+        ];
+    }
+
+    // Oculta nativamente o botão de Tarefa (Criar uma tarefa)
+    if (!empty($rItems['task'])) {
+        $taskClass = method_exists($ticket, 'getTaskClass') ? $ticket->getTaskClass() : TicketTask::class;
+        $overrides['task'] = [
+            'type'         => 'ITILTask',
+            'class'        => $taskClass,
+            'icon'         => CommonITILTask::getIcon(),
+            'label'        => _x('button', 'Create a task'),
+            'short_label'  => _x('button', 'Task'),
+            'template'     => 'components/itilobject/timeline/form_task.html.twig',
+            'item'         => method_exists($ticket, 'getTaskClassInstance') ? $ticket->getTaskClassInstance() : new TicketTask(),
+            'hide_in_menu' => true,
+        ];
+    }
+
+    return $overrides;
+}
+
+/**
+ * Hook item_can
+ * Intercepta verificações de permissão nativas do GLPI (CommonDBTM::can) para itens vinculados a chamados
+ *
+ * @param CommonDBTM $item
+ * @return void
+ */
+function plugin_restrictstatus_item_can(CommonDBTM $item): void {
+    if ($item->right !== CREATE && $item->right !== UPDATE) {
+        return;
+    }
+
+    $ticketId = 0;
+    $itemType = null;
+
+    if ($item instanceof ITILFollowup) {
+        $ticketId = (int)($item->fields['items_id'] ?? $item->input['items_id'] ?? 0);
+        $itemType = 'followup';
+    } elseif ($item instanceof ITILSolution) {
+        $ticketId = (int)($item->fields['items_id'] ?? $item->input['items_id'] ?? $item->input['tickets_id'] ?? 0);
+        $itemType = 'solution';
+    } elseif ($item instanceof Document_Item) {
+        $ticketId = (int)($item->fields['items_id'] ?? $item->input['items_id'] ?? 0);
+        $itemType = 'document';
+    } elseif ($item instanceof TicketTask) {
+        $ticketId = (int)($item->fields['tickets_id'] ?? $item->input['tickets_id'] ?? 0);
+        $itemType = 'task';
+    }
+
+    if ($ticketId <= 0 && isset($_REQUEST['id']) && is_numeric($_REQUEST['id'])) {
+        $ticketId = (int)$_REQUEST['id'];
+    }
+
+    if ($ticketId <= 0 || !$itemType) {
+        return;
+    }
+
+    $userId = Session::getLoginUserID();
+    $restriction = PluginRestrictstatusRestriction::evaluateTicketRestriction($ticketId, $userId, $itemType);
+
+    if ($restriction['restricted']) {
+        $item->right = null; // Causa negação imediata em CommonDBTM::can()
+    }
+}
+
+
