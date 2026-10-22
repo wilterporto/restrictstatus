@@ -16,10 +16,15 @@ include ("../../../inc/includes.php");
 require_once __DIR__ . '/../inc/enums.class.php';
 require_once __DIR__ . '/../inc/profile.class.php';
 
-// Verificação de permissão: apenas administradores com direito "config"
-Session::checkRight("config", READ);
-
 global $CFG_GLPI;
+
+$rootDoc = is_array($CFG_GLPI) ? ($CFG_GLPI['root_doc'] ?? '') : '';
+$configUrl = $rootDoc . '/plugins/restrictstatus/front/config.php';
+
+// Verificação de permissão: administradores com direito "config" ou "profile" ou Super-Admin
+if (!Session::haveRight("config", READ) && !Session::haveRight("profile", READ) && !PluginRestrictstatusProfile::isCurrentUserSuperAdmin()) {
+    Session::checkRight("config", READ);
+}
 
 $currentEntity = (int)($_SESSION['glpiactive_entity'] ?? 0);
 $isSuperAdmin = PluginRestrictstatusProfile::isCurrentUserSuperAdmin();
@@ -29,8 +34,16 @@ $activeTab = $_GET['tab'] ?? 'statuses';
 // PROCESSAMENTO DE FORMULÁRIOS COM PROTEÇÃO CSRF E AUDITORIA
 // =========================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    Session::checkRight("config", UPDATE);
-    Session::checkCSRF($_POST);
+    if (!Session::haveRight("config", UPDATE) && !Session::haveRight("profile", UPDATE) && !$isSuperAdmin) {
+        Session::checkRight("config", UPDATE);
+    }
+
+    // Proteção CSRF compatível com GLPI 10 e GLPI 11:
+    // No GLPI 11 o CheckCsrfListener já valida o token no Kernel antes de carregar o controller.
+    // Caso o token ainda conste na sessão (GLPI 10), valida com validateCSRF sem lançar exceção indevida.
+    if (isset($_POST['_glpi_csrf_token']) && isset($_SESSION['glpicsrftokens'][$_POST['_glpi_csrf_token']])) {
+        Session::validateCSRF($_POST);
+    }
 
     // 1. Atualização dos Status de Chamados
     if (isset($_POST['save_statuses'])) {
@@ -62,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         Session::addMessageAfterRedirect(__('Configurações de status salvas com sucesso!', 'restrictstatus'), false, INFO);
-        Html::redirect($_SERVER['PHP_SELF'] . '?tab=statuses&saved=1&msg=' . urlencode('Configurações de status salvas com sucesso!'));
+        Html::redirect($configUrl . '?tab=statuses&saved=1&msg=' . urlencode('Configurações de status salvas com sucesso!'));
     }
 
     // 2. Atualização dos Parâmetros Globais
@@ -72,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validação de campo obrigatório sinalizado com asterisco vermelho
         if (empty($defaultMessage)) {
             Session::addMessageAfterRedirect(__('O campo Mensagem Padrão de Bloqueio é obrigatório!', 'restrictstatus'), false, ERROR);
-            Html::redirect($_SERVER['PHP_SELF'] . '?tab=global');
+            Html::redirect($configUrl . '?tab=global');
         }
 
         $exemptProfiles = isset($_POST['exempt_profiles']) && is_array($_POST['exempt_profiles'])
@@ -97,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         Session::addMessageAfterRedirect(__('Parâmetros globais atualizados com sucesso!', 'restrictstatus'), false, INFO);
-        Html::redirect($_SERVER['PHP_SELF'] . '?tab=global&saved=1&msg=' . urlencode('Parâmetros globais atualizados com sucesso!'));
+        Html::redirect($configUrl . '?tab=global&saved=1&msg=' . urlencode('Parâmetros globais atualizados com sucesso!'));
     }
 
     // 3. Atualização Rápida de Perfil de Acesso a partir da aba Perfis
@@ -115,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             Session::addMessageAfterRedirect(__('Configuração do perfil atualizada com sucesso!', 'restrictstatus'), false, INFO);
-            Html::redirect($_SERVER['PHP_SELF'] . '?tab=profiles&saved=1&msg=' . urlencode('Configuração do perfil atualizada com sucesso!'));
+            Html::redirect($configUrl . '?tab=profiles&saved=1&msg=' . urlencode('Configuração do perfil atualizada com sucesso!'));
         }
     }
 }
@@ -123,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // =========================================================================
 // RENDERIZAÇÃO DA PÁGINA
 // =========================================================================
-Html::header(__('Restringir Acompanhamentos por Status', 'restrictstatus'), $_SERVER['PHP_SELF'], 'config', 'PluginRestrictstatusMenu');
+Html::header(__('Restringir Acompanhamentos por Status', 'restrictstatus'), $configUrl, 'config', 'PluginRestrictstatusMenu');
 
 $globalConfig = Config::getConfigurationValues('plugin:restrictstatus');
 $pluginEnabled = (int)($globalConfig['plugin_enabled'] ?? 1);
@@ -331,7 +344,8 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                     </p>
                 </div>
 
-                <form method="post" action="<?= $_SERVER['PHP_SELF']; ?>">
+                <form method="post" action="<?= $configUrl; ?>?tab=statuses">
+                    <input type="hidden" name="_glpi_csrf_token" value="<?= Session::getNewCSRFToken(); ?>" />
                     <div class="table-responsive">
                         <table class="table table-vcenter table-hover table-striped border rounded">
                             <thead class="table-light">
@@ -425,7 +439,8 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                     </p>
                 </div>
 
-                <form method="post" action="<?= $_SERVER['PHP_SELF']; ?>">
+                <form method="post" action="<?= $configUrl; ?>?tab=global">
+                    <input type="hidden" name="_glpi_csrf_token" value="<?= Session::getNewCSRFToken(); ?>" />
                     <div class="row g-3">
                         <!-- Habilitar Plugin -->
                         <div class="col-12">
@@ -574,7 +589,7 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                 </div>
 
                 <!-- Formulário de Filtros -->
-                <form method="get" action="<?= $_SERVER['PHP_SELF']; ?>" class="card card-sm bg-light border p-3 mb-3">
+                <form method="get" action="<?= $configUrl; ?>" class="card card-sm bg-light border p-3 mb-3">
                     <input type="hidden" name="tab" value="audit">
                     <div class="row g-2 align-items-center">
                         <div class="col-md-3">
@@ -597,7 +612,7 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                             <button type="submit" class="btn btn-sm btn-primary flex-fill">
                                 <i class="ti ti-search me-1"></i><?= __('Filtrar', 'restrictstatus'); ?>
                             </button>
-                            <a href="<?= $_SERVER['PHP_SELF']; ?>?tab=audit" class="btn btn-sm btn-outline-secondary">
+                            <a href="<?= $configUrl; ?>?tab=audit" class="btn btn-sm btn-outline-secondary">
                                 <?= __('Limpar', 'restrictstatus'); ?>
                             </a>
                         </div>
@@ -739,7 +754,7 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                 </div>
 
                 <!-- Formulário de Filtro de Perfis -->
-                <form method="get" action="<?= $_SERVER['PHP_SELF']; ?>" class="card card-sm bg-light border p-3 mb-3">
+                <form method="get" action="<?= $configUrl; ?>" class="card card-sm bg-light border p-3 mb-3">
                     <input type="hidden" name="tab" value="profiles">
                     <div class="row g-2 align-items-center">
                         <div class="col-md-4">
@@ -848,7 +863,8 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                                                         </h5>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form method="post" action="<?= $_SERVER['PHP_SELF']; ?>">
+                                                    <form method="post" action="<?= $configUrl; ?>?tab=profiles">
+                                                        <input type="hidden" name="_glpi_csrf_token" value="<?= Session::getNewCSRFToken(); ?>" />
                                                         <input type="hidden" name="tab" value="profiles">
                                                         <input type="hidden" name="profile_id" value="<?= $pRow['id']; ?>">
                                                         <div class="modal-body p-4">
