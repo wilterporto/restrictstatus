@@ -9,6 +9,11 @@
 
 O **Restrict Status** é um plugin de governança e controle de fluxo operacional para o **GLPI 10 e GLPI 11**. Ele permite restringir com precisão cirúrgica a adição de **Acompanhamentos (Followups)**, **Soluções (Solutions)**, **Documentos (Anexos)** e **Tarefas (Tasks)** em chamados de acordo com o **Status do Chamado**, o **Perfil de Acesso do Usuário** e seu **Papel no Chamado** (*Requerente*, *Observador* ou *Técnico Atribuído*).
 
+<p align="center">
+  <img src="docs/images/timeline_preview.jpg" alt="Apresentação do Restrict Status na Timeline do Chamado - GLPI" width="880" style="border-radius: 8px; max-width: 100%;" />
+</p>
+<p align="center"><em>Exemplo da Timeline no GLPI 11 com banner de aviso informativo e botões de ação restritos/ocultos conforme regras de perfil e status.</em></p>
+
 ---
 
 ## 📑 Sumário
@@ -117,7 +122,7 @@ O plugin opera com um modelo avançado de **Defesa em Profundidade (Defense-in-D
 1. Extraia ou clone o repositório na pasta de plugins do seu GLPI:
    ```bash
    cd /caminho/do/glpi/plugins
-   git clone https://github.com/seu-usuario/restrictstatus.git restrictstatus
+   git clone https://github.com/wilterporto/restrictstatus.git restrictstatus
    ```
 2. Instale e ative o plugin via console:
    ```bash
@@ -165,9 +170,14 @@ Na seção **"Regras de Status Ativas no Sistema"** da tela do perfil:
 - Clique em **"Salvar Configurações do Perfil"**.
 
 ### 4. Visualização na Tela do Chamado
-Ao abrir um chamado sujeito a restrições:
-- Os botões de adicionar acompanhamento, solução, documento ou tarefa correspondentes são removidos e desabilitados automaticamente.
-- Caso o alerta esteja ativado no perfil, um banner informativo discreto será apresentado com o ícone de cadeado, o status atual do chamado e o papel do usuário autenticado.
+Ao abrir um chamado sujeito a regras de restrição ativas:
+- **Ocultação Cirúrgica dos Botões de Ação**: Os botões de *"Responder"*, *"Adicionar uma solução"*, *"Adicionar documento"* e *"Adicionar uma tarefa"* têm a renderização suprimida no núcleo do GLPI e são completamente ocultados, impedindo tentativas inválidas de submissão.
+- **Banner Informativo de Restrição**: Se a exibição de alerta estiver habilitada no perfil, um banner moderno e integrado ao tema do GLPI 10 e 11 é exibido na timeline destacando:
+  - O status operacional do chamado (ex.: *Em atendimento (Planejado)*, *Pendente*, etc.).
+  - O papel do usuário no chamado (*Requerente*, *Observador* ou *Técnico Atribuído*).
+  - Badges informativos com os itens restritos (`Acompanhamentos`, `Soluções`, `Documentos`, `Tarefas`).
+  - A justificativa ou mensagem de orientação configurada pelo administrador.
+- **Ambiente Limpo e Seguro**: Evita ruídos de comunicação e retrabalho, garantindo que o usuário compreenda com clareza o motivo pelo qual o chamado se encontra em espera.
 
 ### 5. Central de Auditoria
 Acesse **Configurar > Restringir Status > Auditoria** (acesso exclusivo a Superadmin):
@@ -185,6 +195,9 @@ plugins/restrictstatus/
 ├── README.md                    # Apresentação e documentação de uso do plugin
 ├── setup.php                    # Inicialização, requisitos e registro de hooks do GLPI
 ├── hook.php                     # Rotinas de instalação, desinstalação e listeners de hooks
+├── docs/
+│   └── images/
+│       └── timeline_preview.jpg # Imagem demonstrativa da apresentação na timeline
 ├── ajax/
 │   └── check_restriction.php   # Endpoint assíncrono para validação dinâmica na interface
 ├── css/
