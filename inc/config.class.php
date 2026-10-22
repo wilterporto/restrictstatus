@@ -152,9 +152,9 @@ class PluginRestrictstatusConfig extends CommonDBTM {
 
         $fields = [
             'is_active'          => !empty($data['is_active']) ? 1 : 0,
-            'restrict_requester' => !empty($data['restrict_requester']) ? 1 : 0,
-            'restrict_observer'  => !empty($data['restrict_observer']) ? 1 : 0,
-            'restrict_assigned'  => !empty($data['restrict_assigned']) ? 1 : 0,
+            'restrict_requester' => 1,
+            'restrict_observer'  => 1,
+            'restrict_assigned'  => 1,
             'restrict_followups' => !empty($data['restrict_followups']) ? 1 : 0,
             'restrict_solutions' => !empty($data['restrict_solutions']) ? 1 : 0,
             'restrict_documents' => !empty($data['restrict_documents']) ? 1 : 0,

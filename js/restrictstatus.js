@@ -125,7 +125,7 @@ const RestrictStatus = {
                 <p class="mb-0 small text-muted">${data.message || 'Adição de novos itens bloqueada para o status atual.'}</p>
                 <div class="mt-1 d-flex flex-wrap align-items-center gap-1">
                     <span class="badge bg-warning-lt text-dark me-1">Status: ${data.status_name || ''}</span>
-                    <span class="badge bg-secondary-lt text-dark me-2">Seu Papel: ${data.role_name || ''}</span>
+                    <span class="badge bg-secondary-lt text-dark me-2">Perfil: ${data.profile_name || data.role_name || ''}</span>
                 </div>
             </div>
         `;

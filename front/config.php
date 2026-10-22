@@ -53,9 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($statuses as $statusId => $statusLabel) {
             $statusData = [
                 'is_active'          => isset($_POST["status_{$statusId}_active"]) ? 1 : 0,
-                'restrict_requester' => isset($_POST["status_{$statusId}_requester"]) ? 1 : 0,
-                'restrict_observer'  => isset($_POST["status_{$statusId}_observer"]) ? 1 : 0,
-                'restrict_assigned'  => isset($_POST["status_{$statusId}_assigned"]) ? 1 : 0,
+                'restrict_requester' => 1,
+                'restrict_observer'  => 1,
+                'restrict_assigned'  => 1,
                 'restrict_followups' => isset($_POST["status_{$statusId}_followups"]) ? 1 : 0,
                 'restrict_solutions' => isset($_POST["status_{$statusId}_solutions"]) ? 1 : 0,
                 'restrict_documents' => isset($_POST["status_{$statusId}_documents"]) ? 1 : 0,
@@ -97,7 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'plugin_enabled'            => isset($_POST['plugin_enabled']) ? 1 : 0,
             'default_message'           => $defaultMessage,
             'exempt_profiles'           => json_encode($exemptProfiles),
-            'allow_assigned_technician' => isset($_POST['allow_assigned_technician']) ? 1 : 0,
             'apply_to_mailgate'         => isset($_POST['apply_to_mailgate']) ? 1 : 0,
             'show_timeline_alert'       => isset($_POST['show_timeline_alert']) ? 1 : 0
         ]);
@@ -141,7 +140,6 @@ Html::header(__('Restringir Acompanhamentos por Status', 'restrictstatus'), $con
 $globalConfig = Config::getConfigurationValues('plugin:restrictstatus');
 $pluginEnabled = (int)($globalConfig['plugin_enabled'] ?? 1);
 $defaultMessage = $globalConfig['default_message'] ?? 'Não é permitido adicionar novos acompanhamentos a chamados com o status atual (%s).';
-$allowAssignedTech = (int)($globalConfig['allow_assigned_technician'] ?? 1);
 $applyMailgate = (int)($globalConfig['apply_to_mailgate'] ?? 1);
 $showTimelineAlert = (int)($globalConfig['show_timeline_alert'] ?? 1);
 
@@ -340,7 +338,7 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                 <div class="mb-3">
                     <h4 class="card-title fw-bold text-dark"><?= __('Regras de Bloqueio por Status de Chamado', 'restrictstatus'); ?></h4>
                     <p class="text-muted small">
-                        <?= __('Selecione quais status do chamado devem impedir a inclusão de novos comentários/acompanhamentos e defina os papéis restritos.', 'restrictstatus'); ?>
+                        <?= __('Selecione quais status do chamado devem impedir a inclusão de novos comentários/acompanhamentos e quais itens serão bloqueados.', 'restrictstatus'); ?>
                     </p>
                 </div>
 
@@ -352,7 +350,6 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                                 <tr>
                                     <th style="min-width: 180px;"><?= __('Status do Chamado', 'restrictstatus'); ?></th>
                                     <th class="text-center" style="width: 90px;"><?= __('Ativo', 'restrictstatus'); ?></th>
-                                    <th class="text-center" style="min-width: 250px;"><?= __('Papéis Afetados', 'restrictstatus'); ?></th>
                                     <th class="text-center" style="min-width: 320px;"><?= __('Itens / Ações Bloqueadas', 'restrictstatus'); ?></th>
                                     <th style="min-width: 240px;"><?= __('Mensagem Personalizada (Opcional)', 'restrictstatus'); ?></th>
                                 </tr>
@@ -372,22 +369,6 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                                         <label class="form-check form-switch d-inline-block m-0">
                                             <input class="form-check-input" type="checkbox" name="status_<?= $statusId; ?>_active" value="1" <?= !empty($cfg['is_active']) ? 'checked' : ''; ?>>
                                         </label>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                            <label class="form-check form-check-inline m-0" title="<?= __('Bloquear Requerente', 'restrictstatus'); ?>">
-                                                <input class="form-check-input" type="checkbox" name="status_<?= $statusId; ?>_requester" value="1" <?= !empty($cfg['restrict_requester']) ? 'checked' : ''; ?>>
-                                                <span class="form-check-label small"><i class="ti ti-user text-primary"></i> <?= __('Requerente', 'restrictstatus'); ?></span>
-                                            </label>
-                                            <label class="form-check form-check-inline m-0" title="<?= __('Bloquear Observador', 'restrictstatus'); ?>">
-                                                <input class="form-check-input" type="checkbox" name="status_<?= $statusId; ?>_observer" value="1" <?= !empty($cfg['restrict_observer']) ? 'checked' : ''; ?>>
-                                                <span class="form-check-label small"><i class="ti ti-eye text-info"></i> <?= __('Observador', 'restrictstatus'); ?></span>
-                                            </label>
-                                            <label class="form-check form-check-inline m-0" title="<?= __('Bloquear Técnico Atribuído', 'restrictstatus'); ?>">
-                                                <input class="form-check-input" type="checkbox" name="status_<?= $statusId; ?>_assigned" value="1" <?= !empty($cfg['restrict_assigned']) ? 'checked' : ''; ?>>
-                                                <span class="form-check-label small"><i class="ti ti-user-check text-success"></i> <?= __('Técnico', 'restrictstatus'); ?></span>
-                                            </label>
-                                        </div>
                                     </td>
                                     <td>
                                         <div class="d-flex flex-wrap gap-2 justify-content-center">
@@ -468,21 +449,6 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                             </div>
                         </div>
 
-                        <!-- Opção Técnico Atribuído -->
-                        <div class="col-md-6">
-                            <div class="card card-sm border p-3 h-100">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="allow_assigned_technician" name="allow_assigned_technician" value="1" <?= $allowAssignedTech ? 'checked' : ''; ?>>
-                                    <label class="form-check-label fw-bold" for="allow_assigned_technician">
-                                        <?= __('Permitir Técnico Atribuído Comentar', 'restrictstatus'); ?>
-                                    </label>
-                                    <div class="text-muted small mt-1">
-                                        <?= __('Se o usuário estiver atribuído como técnico no chamado, ele não será bloqueado mesmo que também conste como requerente ou observador.', 'restrictstatus'); ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Opção Coletor de E-mail / Mailgate -->
                         <div class="col-md-6">
                             <div class="card card-sm border p-3 h-100">
@@ -499,15 +465,15 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                         </div>
 
                         <!-- Exibir Alerta na Timeline -->
-                        <div class="col-12">
-                            <div class="card card-sm border p-3">
+                        <div class="col-md-6">
+                            <div class="card card-sm border p-3 h-100">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="show_timeline_alert" name="show_timeline_alert" value="1" <?= $showTimelineAlert ? 'checked' : ''; ?>>
                                     <label class="form-check-label fw-bold" for="show_timeline_alert">
                                         <?= __('Exibir Banner de Alerta Visual na Timeline do Chamado', 'restrictstatus'); ?>
                                     </label>
                                     <div class="text-muted small mt-1">
-                                        <?= __('Exibe um aviso elegante informando o motivo do bloqueio para o requerente ou observador quando visualizar o chamado.', 'restrictstatus'); ?>
+                                        <?= __('Exibe um aviso elegante informando o motivo do bloqueio para o usuário quando visualizar o chamado.', 'restrictstatus'); ?>
                                     </div>
                                 </div>
                             </div>
@@ -628,7 +594,7 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                                 <th style="width: 170px;"><?= __('Usuário & Perfil', 'restrictstatus'); ?></th>
                                 <th style="width: 150px;"><?= __('Ação', 'restrictstatus'); ?></th>
                                 <th style="width: 110px;"><?= __('Chamado', 'restrictstatus'); ?></th>
-                                <th style="width: 130px;"><?= __('Papel Restrito', 'restrictstatus'); ?></th>
+                                <th style="width: 130px;"><?= __('Perfil Restrito', 'restrictstatus'); ?></th>
                                 <th><?= __('Detalhes da Ação', 'restrictstatus'); ?></th>
                                 <th style="width: 110px;"><?= __('IP', 'restrictstatus'); ?></th>
                             </tr>
@@ -672,6 +638,8 @@ $lastLogin = $_SESSION['glpi_currenttime'] ?? date('d/m/Y H:i:s');
                                     <td>
                                         <?php if (!empty($audit['role_name'])): ?>
                                             <span class="badge bg-warning-lt text-dark"><?= htmlspecialchars($audit['role_name']); ?></span>
+                                        <?php elseif (!empty($audit['user_profile'])): ?>
+                                            <span class="badge bg-warning-lt text-dark"><?= htmlspecialchars($audit['user_profile']); ?></span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>

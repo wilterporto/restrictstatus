@@ -129,7 +129,6 @@ function plugin_restrictstatus_install(): bool {
             'plugin_enabled'           => 1,
             'default_message'          => 'Não é permitido adicionar novos acompanhamentos a chamados com o status atual (%s).',
             'exempt_profiles'          => json_encode([4]), // Perfil Super-Admin padrão GLPI
-            'allow_assigned_technician'=> 1,
             'apply_to_mailgate'        => 1,
             'show_timeline_alert'      => 1
         ]);
@@ -273,14 +272,14 @@ function plugin_restrictstatus_pre_item_add(CommonDBTM $item): void {
             'action'      => $actionEnum,
             'ticket_id'   => $ticketId,
             'status_id'   => $restriction['status_id'],
-            'role_name'   => $restriction['role_name'],
+            'role_name'   => $restriction['profile_name'] ?? $restriction['role_name'],
             'entities_id' => $restriction['entities_id'],
             'details'     => sprintf(
-                'Tentativa de adição de %s bloqueada. Chamado #%d com status "%s". Papel do usuário: %s. Mensagem: %s',
+                'Tentativa de adição de %s bloqueada. Chamado #%d com status "%s". Perfil do usuário: %s. Mensagem: %s',
                 $itemLabel,
                 $ticketId,
                 $restriction['status_name'],
-                $restriction['role_name'],
+                $restriction['profile_name'] ?? $restriction['role_name'],
                 $restriction['message']
             )
         ]);
@@ -320,13 +319,13 @@ function plugin_restrictstatus_pre_item_update(CommonDBTM $item): void {
             'action'      => PluginRestrictstatusAuditAction::SolutionBlocked->value,
             'ticket_id'   => $ticketId,
             'status_id'   => $restriction['status_id'],
-            'role_name'   => $restriction['role_name'],
+            'role_name'   => $restriction['profile_name'] ?? $restriction['role_name'],
             'entities_id' => $restriction['entities_id'],
             'details'     => sprintf(
-                'Tentativa de solucionar o chamado bloqueada. Chamado #%d com status "%s". Papel do usuário: %s. Mensagem: %s',
+                'Tentativa de solucionar o chamado bloqueada. Chamado #%d com status "%s". Perfil do usuário: %s. Mensagem: %s',
                 $ticketId,
                 $restriction['status_name'],
-                $restriction['role_name'],
+                $restriction['profile_name'] ?? $restriction['role_name'],
                 $restriction['message']
             )
         ]);

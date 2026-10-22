@@ -47,6 +47,7 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
             'restricted'          => false,
             'status_id'           => 0,
             'status_name'         => '',
+            'profile_name'        => '',
             'role_name'           => '',
             'message'             => '',
             'entities_id'         => 0,
@@ -126,80 +127,19 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
             return $notRestricted;
         }
 
-        // 6. Assegurar que os atores do chamado estão carregados
-        if (method_exists($ticket, 'loadActors')) {
-            $ticket->loadActors();
-        }
-
-        // 7. Determinar papéis do usuário no chamado
-        $isAssign     = false;
-        $isRequester  = false;
-        $isObserver   = false;
-
-        if ($userId && $userId > 0) {
-            // Técnico Atribuído
-            if ($ticket->isUser(CommonITILActor::ASSIGN, $userId)) {
-                $isAssign = true;
-            }
-            if (!$isAssign && isset($_SESSION['glpigroups']) && is_array($_SESSION['glpigroups'])) {
-                if ($ticket->haveAGroup(CommonITILActor::ASSIGN, $_SESSION['glpigroups'])) {
-                    $isAssign = true;
-                }
-            }
-
-            // Requerente
-            if ($ticket->isUser(CommonITILActor::REQUESTER, $userId)
-                || (isset($ticket->fields['users_id_recipient']) && (int)$ticket->fields['users_id_recipient'] === $userId)) {
-                $isRequester = true;
-            }
-            if (!$isRequester && isset($_SESSION['glpigroups']) && is_array($_SESSION['glpigroups'])) {
-                if ($ticket->haveAGroup(CommonITILActor::REQUESTER, $_SESSION['glpigroups'])) {
-                    $isRequester = true;
-                }
-            }
-
-            // Observador
-            if ($ticket->isUser(CommonITILActor::OBSERVER, $userId)) {
-                $isObserver = true;
-            }
-            if (!$isObserver && isset($_SESSION['glpigroups']) && is_array($_SESSION['glpigroups'])) {
-                if ($ticket->haveAGroup(CommonITILActor::OBSERVER, $_SESSION['glpigroups'])) {
-                    $isObserver = true;
-                }
+        // 6. Obter nome do perfil do usuário para identificação e auditoria
+        $profileName = '';
+        if ($activeProfileId > 0) {
+            $profObj = new Profile();
+            if ($profObj->getFromDB($activeProfileId)) {
+                $profileName = (string)($profObj->fields['name'] ?? '');
             }
         }
-
-        // Opção: Se o usuário for técnico atribuído ao chamado, permitir comentários/ações se configurado
-        $allowAssignedTech = (int)($globalConfig['allow_assigned_technician'] ?? 1);
-        if ($isAssign && $allowAssignedTech === 1 && (int)$configRow['restrict_assigned'] !== 1) {
-            return $notRestricted;
+        if (empty($profileName)) {
+            $profileName = (string)($_SESSION['glpiactiveprofile']['name'] ?? __('Perfil Restrito', 'restrictstatus'));
         }
 
-        // 8. Checagem de restrição por papel
-        $restrictedRole = null;
-
-        if ($isRequester && (int)$configRow['restrict_requester'] === 1) {
-            $restrictedRole = PluginRestrictstatusActorRole::Requester->label();
-        } elseif ($isObserver && (int)$configRow['restrict_observer'] === 1) {
-            $restrictedRole = PluginRestrictstatusActorRole::Observer->label();
-        } elseif ($isAssign && (int)$configRow['restrict_assigned'] === 1) {
-            $restrictedRole = PluginRestrictstatusActorRole::Assigned->label();
-        } elseif (!$isAssign && (int)$configRow['restrict_requester'] === 1 && Session::getCurrentInterface() === 'helpdesk') {
-            // Usuário comum da interface simplificada (helpdesk) sem atribuição técnica
-            $restrictedRole = __('Usuário Solicitante', 'restrictstatus');
-        } elseif (!$isAssign && (int)$configRow['restrict_assigned'] === 1 && Session::getCurrentInterface() !== 'helpdesk') {
-            // Usuário ou técnico na interface padrão/central com perfil restrito
-            $restrictedRole = __('Técnico', 'restrictstatus');
-        } elseif ((int)$configRow['restrict_assigned'] === 1) {
-            // Regra ampla para perfil técnico quando a restrição de técnicos estiver ativa
-            $restrictedRole = __('Técnico / Perfil', 'restrictstatus');
-        }
-
-        if ($restrictedRole === null) {
-            return $notRestricted;
-        }
-
-        // 9. Checagem dos tipos de itens bloqueados
+        // 7. Checagem dos tipos de itens bloqueados para este status
         $blockFollowups = (int)($configRow['restrict_followups'] ?? 1) === 1;
         $blockSolutions = (int)($configRow['restrict_solutions'] ?? 1) === 1;
         $blockDocuments = (int)($configRow['restrict_documents'] ?? 1) === 1;
@@ -232,7 +172,7 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
             }
         }
 
-        // 10. Monta a mensagem informativa/bloqueio considerando perfil, item e status
+        // 8. Monta a mensagem informativa/bloqueio considerando perfil, item e status
         $statusName = Ticket::getStatus($statusId);
         $profileCfg = PluginRestrictstatusProfile::getProfileConfig($activeProfileId);
 
@@ -264,7 +204,8 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
             'restricted'          => true,
             'status_id'           => $statusId,
             'status_name'         => $statusName,
-            'role_name'           => $restrictedRole,
+            'profile_name'        => $profileName,
+            'role_name'           => $profileName,
             'message'             => $message,
             'entities_id'         => $entitiesId,
             'ticket_id'           => $ticketId,
@@ -359,7 +300,7 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
      */
     public static function renderTimelineNoticeHTML(array $restriction): string {
         $safeMsg = htmlspecialchars($restriction['message'] ?? '', ENT_QUOTES, 'UTF-8');
-        $safeRole = htmlspecialchars($restriction['role_name'] ?? '', ENT_QUOTES, 'UTF-8');
+        $safeProfile = htmlspecialchars($restriction['profile_name'] ?? $restriction['role_name'] ?? '', ENT_QUOTES, 'UTF-8');
         $safeStatus = htmlspecialchars($restriction['status_name'] ?? '', ENT_QUOTES, 'UTF-8');
 
         $rItems = $restriction['restricted_items'] ?? [];
@@ -390,7 +331,7 @@ class PluginRestrictstatusRestriction extends CommonDBTM {
             $html .= "    <p class='mb-0 small text-muted'>{$safeMsg}</p>";
             $html .= "    <div class='mt-1 d-flex flex-wrap align-items-center gap-1'>";
             $html .= "      <span class='badge bg-warning-lt text-dark me-1'>" . __('Status:', 'restrictstatus') . " {$safeStatus}</span>";
-            $html .= "      <span class='badge bg-secondary-lt text-dark me-2'>" . __('Seu Papel:', 'restrictstatus') . " {$safeRole}</span>";
+            $html .= "      <span class='badge bg-secondary-lt text-dark me-2'>" . __('Perfil:', 'restrictstatus') . " {$safeProfile}</span>";
             $html .= "    </div>";
             $html .= "  </div>";
             $html .= "</div>";

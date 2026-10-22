@@ -240,7 +240,7 @@ class PluginRestrictstatusProfile extends CommonDBTM {
                                             <?= __('Regras de Status Ativas no Sistema', 'restrictstatus'); ?>
                                         </h6>
                                         <div class="text-muted small mt-1">
-                                            <?= __('Configure abaixo individualmente para este perfil quais status de chamado terão restrição na inclusão de acompanhamentos e quais papéis serão bloqueados.', 'restrictstatus'); ?>
+                                            <?= __('Configure abaixo individualmente para este perfil quais status de chamado terão restrição e quais itens/ações serão bloqueados.', 'restrictstatus'); ?>
                                         </div>
                                     </div>
                                     <span class="badge bg-primary-lt fs-6 py-1 px-2">
@@ -255,7 +255,6 @@ class PluginRestrictstatusProfile extends CommonDBTM {
                                             <tr>
                                                 <th style="min-width: 180px;"><?= __('Status do Chamado', 'restrictstatus'); ?></th>
                                                 <th class="text-center" style="width: 90px;"><?= __('Ativo', 'restrictstatus'); ?></th>
-                                                <th class="text-center" style="min-width: 250px;"><?= __('Papéis Afetados', 'restrictstatus'); ?></th>
                                                 <th class="text-center" style="min-width: 320px;"><?= __('Itens / Ações Bloqueadas', 'restrictstatus'); ?></th>
                                                 <th style="min-width: 240px;"><?= __('Mensagem Personalizada do Status (Opcional)', 'restrictstatus'); ?></th>
                                             </tr>
@@ -279,34 +278,6 @@ class PluginRestrictstatusProfile extends CommonDBTM {
                                                                <?= !empty($stCfg['is_active']) ? 'checked' : ''; ?> 
                                                                <?= !$canUpdate ? 'disabled' : ''; ?>>
                                                     </label>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                                        <label class="form-check form-check-inline m-0" title="<?= __('Bloquear Requerente', 'restrictstatus'); ?>">
-                                                            <input class="form-check-input" type="checkbox" 
-                                                                   name="profile_statuses[<?= $stId; ?>][restrict_requester]" 
-                                                                   value="1" 
-                                                                   <?= !empty($stCfg['restrict_requester']) ? 'checked' : ''; ?> 
-                                                                   <?= !$canUpdate ? 'disabled' : ''; ?>>
-                                                            <span class="form-check-label small"><i class="ti ti-user text-primary"></i> <?= __('Requerente', 'restrictstatus'); ?></span>
-                                                        </label>
-                                                        <label class="form-check form-check-inline m-0" title="<?= __('Bloquear Observador', 'restrictstatus'); ?>">
-                                                            <input class="form-check-input" type="checkbox" 
-                                                                   name="profile_statuses[<?= $stId; ?>][restrict_observer]" 
-                                                                   value="1" 
-                                                                   <?= !empty($stCfg['restrict_observer']) ? 'checked' : ''; ?> 
-                                                                   <?= !$canUpdate ? 'disabled' : ''; ?>>
-                                                            <span class="form-check-label small"><i class="ti ti-eye text-info"></i> <?= __('Observador', 'restrictstatus'); ?></span>
-                                                        </label>
-                                                        <label class="form-check form-check-inline m-0" title="<?= __('Bloquear Técnico Atribuído', 'restrictstatus'); ?>">
-                                                            <input class="form-check-input" type="checkbox" 
-                                                                   name="profile_statuses[<?= $stId; ?>][restrict_assigned]" 
-                                                                   value="1" 
-                                                                   <?= !empty($stCfg['restrict_assigned']) ? 'checked' : ''; ?> 
-                                                                   <?= !$canUpdate ? 'disabled' : ''; ?>>
-                                                            <span class="form-check-label small"><i class="ti ti-user-check text-success"></i> <?= __('Técnico', 'restrictstatus'); ?></span>
-                                                        </label>
-                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="d-flex flex-wrap gap-2 justify-content-center">
@@ -400,7 +371,7 @@ class PluginRestrictstatusProfile extends CommonDBTM {
                                         <i class="ti ti-lock"></i> <?= __('1. Perfil com Bloqueio Ativo', 'restrictstatus'); ?>
                                     </h6>
                                     <p class="small text-muted mb-0">
-                                        <?= __('Quando definido como <strong>Aplicar Regras de Bloqueio</strong>, o usuário não conseguirá adicionar acompanhamentos nos chamados que estejam com status restrito (respeitando o papel de requerente, observador ou técnico).', 'restrictstatus'); ?>
+                                        <?= __('Quando definido como <strong>Aplicar Regras de Bloqueio</strong>, qualquer usuário com este perfil estará totalmente bloqueado para adicionar novos itens nos chamados com status restrito, independentemente de qual seja o seu papel no chamado (requerente, observador ou técnico).', 'restrictstatus'); ?>
                                     </p>
                                 </div>
                             </div>
@@ -420,7 +391,7 @@ class PluginRestrictstatusProfile extends CommonDBTM {
                                         <i class="ti ti-list-check"></i> <?= __('3. Regras de Status Individuais e Exclusivas', 'restrictstatus'); ?>
                                     </h6>
                                     <p class="small text-muted mb-0">
-                                        <?= __('Na seção <strong>Regras de Status Ativas no Sistema</strong>, é possível personalizar exatamente quais status de chamado (Novo, Pendente, Fechado, etc.), quais papéis (Requerente, Observador, Técnico) e quais ações/itens (Acompanhamentos, Soluções, Documentos e Tarefas) serão bloqueados especificamente para este perfil, garantindo controle sob medida para cada função operacional.', 'restrictstatus'); ?>
+                                        <?= __('Na seção <strong>Regras de Status Ativas no Sistema</strong>, é possível personalizar exatamente quais status de chamado (Novo, Pendente, Fechado, etc.) e quais ações/itens (Acompanhamentos, Soluções, Documentos e Tarefas) serão bloqueados especificamente para este perfil, garantindo controle sob medida para cada função operacional.', 'restrictstatus'); ?>
                                     </p>
                                 </div>
                             </div>
@@ -1018,9 +989,6 @@ class PluginRestrictstatusProfile extends CommonDBTM {
         foreach ($allStatuses as $statusId => $label) {
             $data = $statusesData[$statusId] ?? [];
             $isActive   = !empty($data['is_active']) ? 1 : 0;
-            $req        = !empty($data['restrict_requester']) ? 1 : 0;
-            $obs        = !empty($data['restrict_observer']) ? 1 : 0;
-            $tech       = !empty($data['restrict_assigned']) ? 1 : 0;
             $followups  = !empty($data['restrict_followups']) ? 1 : 0;
             $solutions  = !empty($data['restrict_solutions']) ? 1 : 0;
             $documents  = !empty($data['restrict_documents']) ? 1 : 0;
@@ -1038,9 +1006,9 @@ class PluginRestrictstatusProfile extends CommonDBTM {
 
             $fields = [
                 'is_active'          => $isActive,
-                'restrict_requester' => $req,
-                'restrict_observer'  => $obs,
-                'restrict_assigned'  => $tech,
+                'restrict_requester' => 1,
+                'restrict_observer'  => 1,
+                'restrict_assigned'  => 1,
                 'restrict_followups' => $followups,
                 'restrict_solutions' => $solutions,
                 'restrict_documents' => $documents,
