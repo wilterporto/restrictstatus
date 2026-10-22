@@ -218,6 +218,12 @@ plugins/restrictstatus/
 
 ---
 
+## 👤 Autor
+
+Desenvolvido por **Wilter Porto** ([@wilterporto](https://github.com/wilterporto)).
+
+---
+
 ## 📄 Licença
 
 Este plugin é software livre distribuído sob os termos da licença **GNU General Public License v3.0 (GPLv3+)**. Consulte o arquivo [LICENSE](file:///c:/wamp64/www/glpi11/plugins/restrictstatus/LICENSE) para mais informações.

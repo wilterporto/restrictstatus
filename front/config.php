@@ -4,8 +4,8 @@
  * Restrict Status - Plugin GLPI 10 & 11
  * Página de Configuração, Gerenciamento de Status e Painel de Auditoria
  * ---------------------------------------------------------------------
- * @author    Antigravity
- * @copyright 2026 Antigravity
+ * @author    Wilter Porto
+ * @copyright 2026 Wilter Porto
  * @license   GPLv3+
  * ---------------------------------------------------------------------
  */

@@ -4,8 +4,8 @@
  * Restrict Status - Plugin GLPI 10 & 11
  * Processamento do Formulário de Configuração de Perfil
  * ---------------------------------------------------------------------
- * @author    Antigravity
- * @copyright 2026 Antigravity
+ * @author    Wilter Porto
+ * @copyright 2026 Wilter Porto
  * @license   GPLv3+
  * ---------------------------------------------------------------------
  */

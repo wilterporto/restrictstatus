@@ -4,8 +4,8 @@
  * Restrict Status - Plugin GLPI 10 & 11
  * Restringe adição de acompanhamentos (followups) de acordo com o status
  * ---------------------------------------------------------------------
- * @author    Antigravity
- * @copyright 2026 Antigravity
+ * @author    Wilter Porto
+ * @copyright 2026 Wilter Porto
  * @license   GPLv3+
  * ---------------------------------------------------------------------
  */
@@ -92,9 +92,9 @@ function plugin_version_restrictstatus(): array {
     return [
         'name'           => 'Restringir Acompanhamentos por Status',
         'version'        => PLUGIN_RESTRICTSTATUS_VERSION,
-        'author'         => 'Antigravity',
+        'author'         => 'Wilter Porto',
         'license'        => 'GPLv3+',
-        'homepage'       => '',
+        'homepage'       => 'https://github.com/wilterporto/restrictstatus',
         'requirements'   => [
             'glpi' => [
                 'min' => PLUGIN_RESTRICTSTATUS_MIN_GLPI,

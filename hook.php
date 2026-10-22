@@ -4,8 +4,8 @@
  * Restrict Status - Plugin GLPI 10 & 11
  * Arquivo de hooks, instalação, desinstalação e regras de negócio
  * ---------------------------------------------------------------------
- * @author    Antigravity
- * @copyright 2026 Antigravity
+ * @author    Wilter Porto
+ * @copyright 2026 Wilter Porto
  * @license   GPLv3+
  * ---------------------------------------------------------------------
  */

@@ -4,8 +4,8 @@
  * Restrict Status - Plugin GLPI 10 & 11
  * Motor de avaliação e validação de restrições de acompanhamento
  * ---------------------------------------------------------------------
- * @author    Antigravity
- * @copyright 2026 Antigravity
+ * @author    Wilter Porto
+ * @copyright 2026 Wilter Porto
  * @license   GPLv3+
  * ---------------------------------------------------------------------
  */
