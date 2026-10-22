@@ -42,49 +42,44 @@ function plugin_init_restrictstatus(): void {
     Plugin::registerClass('PluginRestrictstatusAudit');
     Plugin::registerClass('PluginRestrictstatusMenu');
 
-    // Apenas se o usuário estiver autenticado
-    if (Session::getLoginUserID()) {
-        // Página de configuração padrão nos plugins do GLPI
-        $PLUGIN_HOOKS['config_page']['restrictstatus'] = 'front/config.php';
+    // Página de configuração padrão nos plugins do GLPI
+    $PLUGIN_HOOKS['config_page']['restrictstatus'] = 'front/config.php';
 
-        // Entrada de menu em Configurar (Setup)
-        if (Session::haveRight('config', READ)) {
-            $PLUGIN_HOOKS['menu_toadd']['restrictstatus'] = [
-                'config' => 'PluginRestrictstatusMenu'
-            ];
-        }
+    // Entrada de menu em Configurar (Setup)
+    $PLUGIN_HOOKS['menu_toadd']['restrictstatus'] = [
+        'config' => 'PluginRestrictstatusMenu'
+    ];
 
-        // Hook essencial no backend: Intercepta adição de acompanhamentos, soluções, documentos e tarefas
-        $PLUGIN_HOOKS['pre_item_add']['restrictstatus'] = [
-            'ITILFollowup'  => 'plugin_restrictstatus_pre_item_add',
-            'ITILSolution'  => 'plugin_restrictstatus_pre_item_add',
-            'Document_Item' => 'plugin_restrictstatus_pre_item_add',
-            'Document'      => 'plugin_restrictstatus_pre_item_add',
-            'TicketTask'    => 'plugin_restrictstatus_pre_item_add',
-        ];
+    // Hook essencial no backend: Intercepta adição de acompanhamentos, soluções, documentos e tarefas
+    $PLUGIN_HOOKS['pre_item_add']['restrictstatus'] = [
+        'ITILFollowup'  => 'plugin_restrictstatus_pre_item_add',
+        'ITILSolution'  => 'plugin_restrictstatus_pre_item_add',
+        'Document_Item' => 'plugin_restrictstatus_pre_item_add',
+        'Document'      => 'plugin_restrictstatus_pre_item_add',
+        'TicketTask'    => 'plugin_restrictstatus_pre_item_add',
+    ];
 
-        // Intercepta atualização direta do chamado (por exemplo, tentativa de mudar para Solucionado)
-        $PLUGIN_HOOKS['pre_item_update']['restrictstatus'] = [
-            'Ticket' => 'plugin_restrictstatus_pre_item_update',
-        ];
+    // Intercepta atualização direta do chamado (por exemplo, tentativa de mudar para Solucionado)
+    $PLUGIN_HOOKS['pre_item_update']['restrictstatus'] = [
+        'Ticket' => 'plugin_restrictstatus_pre_item_update',
+    ];
 
-        // Hook na timeline de chamados para injetar aviso e controle de exibição
-        $PLUGIN_HOOKS['timeline_actions']['restrictstatus'] = 'plugin_restrictstatus_timeline_actions';
+    // Hook na timeline de chamados para injetar aviso e controle de exibição
+    $PLUGIN_HOOKS['timeline_actions']['restrictstatus'] = 'plugin_restrictstatus_timeline_actions';
 
-        // Hook essencial do GLPI para ocultar nativamente botões da timeline no rodapé (Responder, Solução, Documento, Tarefa)
-        $PLUGIN_HOOKS['timeline_answer_actions']['restrictstatus'] = 'plugin_restrictstatus_timeline_answer_actions';
+    // Hook essencial do GLPI para ocultar nativamente botões da timeline no rodapé (Responder, Solução, Documento, Tarefa)
+    $PLUGIN_HOOKS['timeline_answer_actions']['restrictstatus'] = 'plugin_restrictstatus_timeline_answer_actions';
 
-        // Hook de direitos nativo do GLPI (CommonDBTM::can): bloqueia direitos CREATE e UPDATE
-        $PLUGIN_HOOKS['item_can']['restrictstatus'] = 'plugin_restrictstatus_item_can';
+    // Hook de direitos nativo do GLPI (CommonDBTM::can): bloqueia direitos CREATE e UPDATE
+    $PLUGIN_HOOKS['item_can']['restrictstatus'] = 'plugin_restrictstatus_item_can';
 
-        // Carrega CSS e JavaScript do plugin para manipulação visual em tempo real
-        $PLUGIN_HOOKS['add_javascript']['restrictstatus'] = [
-            'js/restrictstatus.js'
-        ];
-        $PLUGIN_HOOKS['add_css']['restrictstatus'] = [
-            'css/restrictstatus.css'
-        ];
-    }
+    // Carrega CSS e JavaScript do plugin para manipulação visual em tempo real
+    $PLUGIN_HOOKS['add_javascript']['restrictstatus'] = [
+        'js/restrictstatus.js'
+    ];
+    $PLUGIN_HOOKS['add_css']['restrictstatus'] = [
+        'css/restrictstatus.css'
+    ];
 }
 
 /**
