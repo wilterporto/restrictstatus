@@ -19,7 +19,7 @@ if (!defined('GLPI_ROOT')) {
 require_once __DIR__ . '/inc/enums.class.php';
 require_once __DIR__ . '/hook.php';
 
-define('PLUGIN_RESTRICTSTATUS_VERSION', '1.0.1');
+define('PLUGIN_RESTRICTSTATUS_VERSION', '1.0.2');
 define('PLUGIN_RESTRICTSTATUS_MIN_GLPI', '10.0.0');
 define('PLUGIN_RESTRICTSTATUS_MAX_GLPI', '11.9.99');
 define('PLUGIN_RESTRICTSTATUS_MIN_PHP', '8.3.0');
